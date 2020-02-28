@@ -1,0 +1,484 @@
+VLAD ANDREI-ALEXANDRU
+321CB
+
+================================== TEMA 3 IOCLA ===================================
+===================================== README ======================================
+
+
+
+mystery1(): - numara caracterele unui string
+=============================================
+
+@string: adresa de inceput a sirului
+
+DESCRIERE:
+	Aceasta procedura verifica fiecare octet al sirului transmis ca parametru pe 
+	stiva. Cat timp caracterul curent este diferit de 0 se incrementeaza contorul 
+	(EAX) si se trece la urmatorul caracter.
+	
+OPTIMIZARI:
+	Se poate calcula distanta folosind $-inceput_adresa_string
+
+RETURN:
+	Se va intoarce numarul de caractere din sir.
+
+PROTOTIP: int mystery1(char* string);
+
+
+
+
+
+
+mystery2(): - cauta un caracter intr-un string
+==============================================
+
+@string – adresa de inceput a sirului
+@character – caracterul cautat
+
+DESCRIERE:
+	Aceasta procedura cauta caracterul in string.
+Se compara fiecare caracter din string cu caracterul cautat pana cand se gaseste.
+	Bug-ul acestei proceduri este ca daca litera nu se gaseste in string, cautarea
+continua dincolo de finalul sirului (deoarece nu exista nicio conditie care 
+verifica null-terminatorul string-ului). Aceasta procedura se incheie cand se 
+gaseste random prin memorie un caracter egal cu cel cautat sau cand se 
+genereaza segfault.
+	
+OPTIMIZARI:
+	
+RETURN:
+	Se va intoarce pozitia (fata de inceputul string-ului) pe care s-a gasit 
+caracterul sau -1 daca sirul este null.
+	
+PROTOTIP: int mystery2(char* string, char caracter);
+
+
+
+
+
+
+mystery3(): - compara doua siruri pana la o anumita pozitie
+===========================================================
+
+@string1 – adresa de inceput a sirului 1
+@string2 – adresa de inceput a sirului 2
+@n – numarul de caractere de verificat
+
+DESCRIERE:
+	Aceasta procedura compara primele n caractere ale sirurilor. Se verifica 
+pe rand primele n caractere, iar in caz ca nu sunt egale se iese din procedura cu
+codul de eroare 1. Altfel, daca sunt egale se intoarce codul 0.
+
+OPTIMIZARI:	
+
+RETURN:
+	0 – succes
+	1 – fail
+	
+PROTOTIP: int mystery3(char* string1, char* string2, int n);
+
+
+
+
+
+
+
+mystery4(): - copiaza n caractere dintr-un string in alt string
+===============================================================
+
+@sursa – adresa de inceput a sirului sursei
+@destinatie – adresa de inceput a sirului destinatiei
+@n – numarul de caractere de copiat
+
+DESCRIERE:
+	Aceasta procedura copiaza octet cu octet n caractere din string-ul sursa
+in string-ul destinatie.
+	Un bug este ca daca intentia este crearea unui substring din string-ul 
+sursa, in aceasta procedura nu se pune null-terminatorul la final.	
+
+OPTIMIZARI:
+	Trebuie pus null terminator dupa copierea tuturor octetilor doriti.
+
+RETURN:
+	Nu se returneaza nimic (in EAX ramane adresa ultimului octet copiat din 
+sirul initial). Procedurile "parse_args()" si "mystery6()" nu folosesc, dupa
+apel, registrul EAX cu vreun scop anume.
+
+PROTOTIP: void mystery4(char* sursa, char* destinatie, int n);
+
+
+
+
+
+
+
+mystery5(): - testeaza daca este cifra ASCII caracterul dat ca parametru
+===========================================================================
+
+@char – caracterul de testat
+
+DESCRIERE:
+	Aceasta procedura primeste ca parametru un DWORD, dar se verifica decat 
+partea low (deci practic nu ne intereseaza restul celor 3 octeti - face CAST). 
+	Se compara caracterul (din partea low a registrului) cu codurile
+ASCII ale lui 0 (0x30) si 9 (0x39). Daca acel caracter testat nu este cuprins
+in aceste doua valori se returneaza 0. Daca este cuprins, atunci se returneaza 1.
+
+OPTIMIZARI:
+
+RETURN:
+	0 – daca nu este cifra ASCII
+	1 – daca este cifra ASCII
+
+PROTOTIP: int mystery5(int char);
+
+
+
+
+
+
+
+mystery6(): - inverseaza un string
+=========================================================
+
+@string – adresa de inceput a sirului
+
+DESCRIERE:
+	Se copiaza string-ul dat ca parametru in zona de memorie alocata in aceasta 
+procedura. Pentru a calcula cate caractere sa copieze se foloseste de procedura 
+mystery1 pentru a afla lungimea sirului initial. 
+	Apoi se copiaza cei n octeti ai sirului 1 in zona de memorie alocata pe stiva
+octet cu octet. Dupa aceasta copiere se apeleaza procedura mystery4 cu parametrii
+adresa de sfarsit a string-ului copiat, adresa de inceput a string-ului initial si
+lungimea sirului initial. Dupa acest apel se suprascrie zona de memorie a
+string-ului initial, doar ca ordinea este inversa (se copiaza la indexul 0
+caracterul de la indexul (strlen(string_initial) - 1). Dupa aceasta operatie,
+sirul initial va fi inversat (null terminatorul ramane pe loc, nu se muta).
+
+OPTIMIZARI:
+
+RETURN:
+	Se va returna numarul de caractere al string-ului dat ca parametru.
+	
+PROTOTIP: void mystery6(char* string1);
+
+
+
+
+
+
+
+mystery7(): - face conversia de la string la int
+================================================
+
+@toInt - adresa de inceput a sirului
+
+DESCRIERE:
+	Aceasta procedura primeste ca parametru un string, aloca pe stiva 4 octeti
+(un uint_32) unde se va stoca numarul convertit, iar apeland mystery1() se
+obtine lungimea sirului de convertit.
+	Se apeleaza mystery6() pentru a inversa string-ul si se ia octet cu octet
+(de la finalul string-ului rasturnat) verificandu-l daca este cifra ASCII sau nu.
+	Daca nu este cifra ASCII se returneaza -1.
+	Cat timp este cifra ASCII se face conversia de la caracterul ASCII la octetul
+reprezentand valoarea corespunzatoare (se scade 0x30). Aceasta cifra rezultata se
+concateneaza la variabila locala in care se va retine numarul convertit. Se repeta
+acesti pasi pana se termina toate cifrele din string rezultand numarul convertit
+in registrul EAX. Daca pe parcursul acestor pasi se gaseste un alt caracter care
+nu este cuprins intre 0x30 si 0x39 (nu este cifra ASCII) se returneaza direct -1.
+
+OPTIMIZARI:
+	- PUSHA si POPA in loc de toate push-urile alea. (pentru size)
+	- nu mai apela mystery5. scade direct 0x30. verifica doar daca este mai mic decat 
+0xa (considerand numarul ca fiind unsigned - jbe)
+	
+
+RETURN:
+	Se va returna numarul convertit sau -1 daca string-ul nu reprezinta un numar
+(contine si alte caractere in afara de caracterele ASCII pentru cifre).
+
+PROTOTIP: int mystery7(char* toInt);
+
+
+
+
+
+
+
+mystery8(): - cauta un substring intr-un string
+=========================================================
+
+@string - adresa de inceput a sirului in care se cauta substring-ul
+@substring - adresa de inceput a substring-ului cautat
+@n_substring - numarul de octeti care se doresc gasiti din substring
+				in string (primii n octeti)
+
+DESCRIERE:
+	Aceasta procedura aloca pe stiva 16 octeti (<==> 4 int). Dintre acestia
+se folosesc decat primii doi int (ebp -0x4 si -0x8) pentru indecsi in cele
+doua string-uri. Se compara cele doua string-uri octet cu octet de n_substring
+ori sau pana cand se parcurge string-ul initial pana la '\0' sau '\n'. 
+	Daca in acest ciclu mentionat anterior se gasesc caractere diferite
+se reseteaza indexul substring-ului si se reia cautarea de unde a ramas indexul
+string-ului in care se face cautarea. Acest lucru poate fi considerat un bug
+deoarece pe unele cazuri particulare poate sa sara peste litere si sa nu gaseasca
+substring-ul chiar daca el exista in string. (Un exemplu ar fi: caut abc
+in aabcd. Avand in vedere ca atunci cand compara pe 'b' cu 'a', nefiind egale, se
+va reseta indexul substring-ului si continua cautarea de la indexul vechi din
+string: compara pe 'a' din substring cu 'b' din string. Deja aici a ratat un match
+din tot string-ul). Daca s-au comparat cele n_substring caractere si a fost toate
+egale, atunci se va returna 1. In orice alt caz se va returna 0.
+
+OPTIMIZARI:
+	Aloca mai putin spatiu pe stiva
+	mov dl, byte [EAX] in loc de al (poate salveaza timp)
+	Foloseste registrii in loc de memorie la indecsi
+
+RETURN:
+	Se returneaza 1 daca substring-ul a fost gasit in string. (nu merge in toate
+	cazurile - exoplicatie data mai sus)
+	Daca nu se gaseste se returneaza 0. (inclusiv cazul buguit explicat mai sus)
+	
+PROTOTIP: int mystery8(char* string, char* substring, int n_substring);
+
+
+
+
+
+
+
+mystery9(): - cauta un substring intr-un string pe o pozitie anume
+			si afiseaza liniile pe care se gaseste substring-ul
+==================================================================
+
+@string - adresa de inceput a string-ului in care se cauta
+@START_index - pozitia de la care se incepe cautarea in string
+@END_index - pozitia pana la care se cauta substring-ul in string 
+@substring - adresa de inceput a substring-ului care se cauta in string
+
+DESCRIERE:
+	Se aloca 24 de octeti si se initializeaza cu 0 cel de-al treilea intreg.
+	Dintre cele 6 variabile alocate se folosesc decat VAR3 (0xC), VAR4 (0x10)
+si VAR5 (0x14), deci VAR1, VAR2 si VAR6 sunt inutile.
+	VAR3 este folosit ca un index pornind de la START_index.
+	Cu ajutorul procedurii mystery1() se retine lungimea string-ului in care
+se cauta (strlen(string)).
+	Cat timp START_index < END_index se executa instructiunile:
+
+	Se apeleaza mystery8(string[START_index], substring, strlen()), iar 
+cu rezultatul acestui apel se verifica daca substring-ul se gaseste in
+string incepand de la START_index.
+	Daca substring-ul nu este continut in string se cauta substring-ul
+de la urmatorul octet din string (START_index + i).
+	Daca substring-ul a fost gasit atunci se apeleaza procedura
+"print_line" care afiseaza in consola linia care contine substring-ul.
+	Se executa aceste instructiuni pana cand START_index ajunge pe aceeasi
+pozitie cu END_index.
+	Daca substring-ul este continut in mai multe linii ale string-ului intial
+intre aceiasi indecsi (START_index si END_index) le va afisa pe toate 
+(asta daca nu ajunge pe cazul buguit explicat in mystery8()).
+
+OPTIMIZARI:
+	Se poate aloca mai putina memorie pentru variabilele locale.
+	Prima initializare a VAR_0XC e inutila deoarece mai jos este initializat
+cu 1;
+	Se poate elimina intructiunea setn si test deoarece sunt redundante
+(verificarea deja a fost facuta in test-ul anterior);
+
+
+RETURN:
+	Procedura nu intoarce nimic (este void).
+	
+PROTOTIP: void mystery9(char* string, int START_index, int END_index, char* substring);
+
+
+
+
+
+	TEMA3
+
+NUME
+	tema3 - cauta un substring intr-un string si afiseaza liniile in care se regaseste
+
+
+SINTAXA
+	tema3 [OPTION]... [FILE]...
+
+
+DESCRIERE
+	Citeste de la tastatura un string si il afiseaza in consola (atunci cand nu primeste
+parametrii).
+	Daca primeste parametrii cauta substring-ul dat in linia de comanda in string-ul citit
+de la tastatura sau din fisier.
+	Daca gaseste substring-ul in string afiseaza linia sau caracterele gasite cuprinse intre
+	string[start] si string[end], unde start si end sunt intregii urmati de -s si -e.
+	Daca nu se gaseste nicio aparitie atunci nu se afiseaza nimic
+
+	-f, (--find)
+		dupa acest parametru urmeaza substring-ul de cautat. Daca se foloseste impreuna cu
+		-i 'file' afiseaza liniile string-ului in care se gaseste substring-ul
+
+	-s, (--start)
+		se mentioneaza de pe ce pozitie din fiecare linie a string-ului se incepe cautarea
+		substring-ului
+
+	-e, (--end)
+		se mentioneaza pana la ce pozitie din fiecare linie a string-ului se cauta substring-ul
+
+	-i [file], (--input)
+		se cauta substring-ul in string-ul din interiorul fisierului
+
+
+	Cea mai buna utilizare a acestui program este de forma:
+	./tema3 -f abc -s 2 -e 10 -i 
+
+	Cod de return:
+		0		in toate cazurile
+
+
+
+
+
+
+
+Alte proceduri documentate:
+
+
+_start(): - procedura initiala (main)
+=====================================
+
+Procedura nu are parametrii.
+
+DESCRIERE:
+
+	Aceasta procedura seamana cu functia "main" din C.
+•	Se rezerva 8 octeti pe stiva pentru variabile locale.
+•	Se observa ca se sare primul argument de pe stiva (numele executabilului)
+•	Salveaza in memorie [wat1] numarul de argumente (nume executabil + nr argumente)
+•	Salveaza in memorie [wat2] calea executabilului
+•	Daca programul nu se lanseaza cu parametrii atunci sare la procedura 
+do_simple_echo care citeste de la tastatura un string si il afiseaza in consola. 
+Altfel se parseaza argumentele.
+
+OPTIMIZARI:
+	Se poate sterge nop - ocupa spatiu si un ciclu de executie.
+
+RETURN: se va returna mereu valoarea 0 (succes)
+
+PROTOTIP: int main();
+
+
+
+
+
+
+
+
+do_simple_echo(): - afiseaza un string citit de la tastatura
+============================================================
+
+Procedura nu are parametrii.
+
+DESCRIERE:
+	Citeste de la tastatura un string si il afiseaza in consola.
+	Exista un bug (intentionat sau nu): daca scriu un string suficient de lung, 
+executabilul afiseaza doar 33 de caractere, iar restul (daca exista) sunt 
+transmise ca urmatoarea comanda din terminal.
+	De exemplu cand programul cere input de la tastatura scriu:
+
+ccccccccccccccccccccccccccccccccsudo apt-get install cowsay -y
+
+Se afiseaza pe ecran substring-ul format din cc..c, iar dupa incheierea 
+programului, sudo… va fi scris in linia de comanda din consola:
+user@ubuntu:<path>$ sudo apt-get install cowsay -y
+	
+OPTIMIZARI:
+1.	se poate sterge and eax, 0xfffffffc (nu are efect)
+2.	scrie de la inceput mov edx, 0x20 
+						mov eax, 0 
+	in loc de restul instructiunilor
+3.	se poate sterge nop de la final
+
+RETURN:
+
+PROTOTIP: int do_simple_echo();
+
+
+
+
+
+
+
+do_read(): - citeste de la tastatura un string
+==============================================
+
+@arg1 – 
+@arg2 -
+@arg3 -
+
+DESCRIERE:
+	Trimite pe stiva adresa catre zona de memorie rezervata pentru citire 
+de la tastatura si apeleaza sistemul de operare prin intermediul procedurii
+syscall_wrapper.
+
+OPTIMIZARI:
+
+RETURN:
+	void
+
+PROTOTIP: void do_read(int arg1, int arg2, int arg3);
+
+
+
+
+
+
+
+do_write(): - scrie in consola un string
+========================================
+
+@arg1 -
+@arg2 -
+@arg3 -
+
+DESCRIERE:
+	Trimite pe stiva adresa string-ului citit de la tastatura si apeleaza 
+sistemul de operare prin intermediul procedurii syscall_wrapper pentru 
+afisarea string-ului in consola.
+
+OPTIMIZARI:
+
+RETURN:
+	void
+
+PROTOTIP: void do_write(int arg1, int arg2, int arg3);
+
+
+
+
+
+
+
+parse_args(): - verifica forma argumentelor (-f -s -e -i)
+=========================================================
+
+	Procedura nu are parametrii.
+
+DESCRIERE:
+•	Se aloca pe stiva 24 de octeti (0x18).
+•	Se reverifica numarul de argumente dar mereu va fi mai mare ca 1
+in aceasta procedura.
+•	compara prima litera din argument cu “-” si apoi verifica litera argumentului:
+f / s / e / i
+•	Daca rulez ./tema3 -f da segfault
+	
+
+OPTIMIZARI:
+1.	primul mov ebp-0xc e inutil pentru ca este suprascris cu ultimul mov
+2.	primul cmp se poate inlocui cu test eax, eax
+3.	nop la 0x8048543 - se poate sterge
+
+RETURN:
+	void
+
+PROTOTIP: void parse_args();
